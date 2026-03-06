@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acceso por hora 2025 · Biblioteca</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --white:#ffffff;--bg:#f7f6f3;--bg2:#f0ede8;--border:#e2ddd7;--border2:#ccc8c0;
+  --text:#1a1915;--muted:#7a7670;--muted2:#a8a49e;
+  --accent:#c8451e;--accent-bg:#fff1ee;
+  --night:#6b3fa0;--night-bg:#f5f0fd;
+  --blue:#1a5fae;--blue-bg:#eef4ff;
+  --green:#1a7a4a;--sidebar-w:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;padding:32px 0;z-index:100;overflow-y:auto;}
+.sb-brand{padding:0 24px 28px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.sb-org{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.sb-sys{font-size:13px;font-weight:600;color:var(--text);line-height:1.3;}
+.sb-year{display:inline-block;margin-top:8px;font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--accent);background:var(--accent-bg);border:1px solid rgba(200,69,30,.2);padding:2px 8px;border-radius:20px;}
+.nav-label{font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted2);padding:0 24px;margin:14px 0 6px;}
+.nav-sec{padding:0 12px;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .15s;font-family:'Inter',sans-serif;}
+.nav-link:hover{background:var(--bg);color:var(--text);}
+.nav-link.active{background:var(--accent-bg);color:var(--accent);}
+.nav-link .ico{font-size:14px;width:18px;text-align:center;}
+.sb-footer{margin-top:auto;padding:20px 24px 0;border-top:1px solid var(--border);font-size:11px;color:var(--muted2);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;}
+
+/* HERO */
+.hero{background:var(--white);border-bottom:1px solid var(--border);padding:52px 56px 44px;}
+.hero-eye{font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.hero-h1{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(36px,5vw,56px);font-weight:400;line-height:1.1;color:var(--text);margin-bottom:16px;}
+.hero-h1 em{font-style:italic;color:var(--accent);}
+.hero-desc{max-width:580px;font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:36px;}
+.hero-kpis{display:flex;flex-wrap:wrap;}
+.hkpi{padding:16px 32px;border-right:1px solid var(--border);}
+.hkpi:first-child{padding-left:0;}
+.hkpi:last-child{border-right:none;}
+.hkpi-val{font-family:'Instrument Serif',serif;font-size:34px;line-height:1;margin-bottom:4px;}
+.hkpi-val.red{color:var(--accent);}
+.hkpi-val.purple{color:var(--night);}
+.hkpi-val.blue{color:var(--blue);}
+.hkpi-label{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.05em;}
+.hkpi-sub{font-size:10px;color:var(--muted2);margin-top:2px;}
+
+/* SECTION */
+.section{padding:48px 56px;border-bottom:1px solid var(--border);}
+.sec-eye{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.sec-eye::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-h2{font-family:'Instrument Serif',serif;font-size:30px;font-weight:400;margin-bottom:6px;}
+.sec-h2 em{font-style:italic;color:var(--accent);}
+.sec-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+
+/* KPI ROW */
+.kpi-row{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--white);margin-bottom:28px;flex-wrap:wrap;}
+.kpi-item{flex:1;min-width:140px;padding:20px 22px;border-right:1px solid var(--border);}
+.kpi-item:last-child{border-right:none;}
+.kpi-label{font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.kpi-val{font-family:'Instrument Serif',serif;font-size:28px;line-height:1;margin-bottom:3px;}
+.kpi-val.red{color:var(--accent);}
+.kpi-val.blue{color:var(--blue);}
+.kpi-val.purple{color:var(--night);}
+.kpi-val.green{color:var(--green);}
+.kpi-sub{font-size:11px;color:var(--muted2);}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.g31{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;}
+@media(max-width:1000px){.g2,.g31{grid-template-columns:1fr;}}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.card-h{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.card-t{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.03em;}
+.card-hint{font-size:11px;color:var(--muted2);}
+.card-b{padding:20px;}
+.ch260{height:260px;position:relative;}
+.ch320{height:320px;position:relative;}
+.ch200{height:200px;position:relative;}
+
+/* HEATMAP */
+.hm-scroll{overflow-x:auto;}
+.hm-hours{display:grid;grid-template-columns:52px repeat(24,1fr);gap:2px;margin-bottom:4px;min-width:700px;}
+.hm-hl{font-size:9px;color:var(--muted2);text-align:center;font-family:'JetBrains Mono',monospace;}
+.hm-row{display:grid;grid-template-columns:52px repeat(24,1fr);gap:2px;margin-bottom:2px;min-width:700px;}
+.hm-dl{font-size:11px;color:var(--muted);text-align:right;padding-right:8px;height:30px;line-height:30px;font-weight:500;}
+.hm-cell{height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'JetBrains Mono',monospace;cursor:default;transition:transform .1s,box-shadow .1s;}
+.hm-cell:hover{transform:scale(1.3);z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.hm-leg{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;color:var(--muted);}
+.hm-leg-bar{width:80px;height:8px;border-radius:4px;}
+
+/* MONTH SELECTOR */
+.month-sel{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:24px;}
+.mb{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:1px solid var(--border);background:var(--white);transition:all .15s;font-family:'Inter',sans-serif;}
+.mb:hover{border-color:var(--border2);color:var(--text);}
+.mb.active{background:var(--text);color:var(--white);border-color:var(--text);}
+
+/* MONTH STAT BAR */
+.msb{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--white);margin-bottom:24px;flex-wrap:wrap;}
+.msb-i{flex:1;min-width:120px;padding:16px 20px;border-right:1px solid var(--border);text-align:center;}
+.msb-i:last-child{border-right:none;}
+.msb-v{font-family:'Instrument Serif',serif;font-size:24px;margin-bottom:2px;}
+.msb-l{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;}
+
+/* INSIGHT */
+.ins-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:28px;}
+.ins{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px 20px;border-left:3px solid var(--border);}
+.ins.red{border-left-color:var(--accent);}
+.ins.purple{border-left-color:var(--night);}
+.ins.blue{border-left-color:var(--blue);}
+.ins.green{border-left-color:var(--green);}
+.ins-t{font-size:13px;font-weight:600;margin-bottom:5px;}
+.ins-b{font-size:12px;color:var(--muted);line-height:1.6;}
+.ins-b strong{color:var(--text);}
+
+/* ANOMALY */
+.af-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.af{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:1px solid var(--border);background:var(--white);transition:all .15s;font-family:'Inter',sans-serif;}
+.af:hover{color:var(--text);border-color:var(--border2);}
+.af.active{background:var(--night);color:white;border-color:var(--night);}
+.a-scroll{max-height:420px;overflow-y:auto;}
+.a-scroll::-webkit-scrollbar{width:4px;}
+.a-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.at{width:100%;border-collapse:collapse;font-size:13px;}
+.at thead{position:sticky;top:0;background:var(--white);z-index:5;}
+.at th{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+.at td{padding:9px 14px;border-bottom:1px solid var(--bg);vertical-align:middle;}
+.at tr:hover td{background:var(--bg);}
+.hchip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;}
+.chip-d{background:var(--night-bg);color:var(--night);border:1px solid rgba(107,63,160,.2);}
+.chip-l{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(200,69,30,.2);}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+.dneg{color:#dc2626;}
+.dpos{color:var(--green);}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.bc{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+.bh{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa;}
+.bm{background:#fefce8;color:#ca8a04;border:1px solid #fef08a;}
+.bl{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+
+@media(max-width:800px){.sidebar{display:none;}.main{margin-left:0;}.hero,.section{padding:32px 24px;}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-org">Sistema de Bibliotecas</div>
+    <div class="sb-sys">Acceso por hora</div>
+    <span class="sb-year">2025</span>
+  </div>
+  <div class="nav-label">Navegación</div>
+  <div class="nav-sec">
+    <button class="nav-link active" onclick="navTo('sec-resumen',this)"><span class="ico">◎</span>Resumen</button>
+    <button class="nav-link" onclick="navTo('sec-acceso',this)"><span class="ico">↗</span>Acceso anual</button>
+    <button class="nav-link" onclick="navTo('sec-mensual',this)"><span class="ico">📆</span>Vista mensual</button>
+    <button class="nav-link" onclick="navTo('sec-anomalias',this)"><span class="ico">⚠</span>Anomalías nocturnas</button>
+  </div>
+  <div class="nav-label">Período</div>
+  <div class="nav-sec">
+    <button class="nav-link"><span class="ico">📅</span>Ene – Dic 2025</button>
+    <button class="nav-link"><span class="ico">⬡</span>8.760 registros</button>
+  </div>
+  <div class="sb-footer">Informe · 2025<br>Sistema de Bibliotecas</div>
+</aside>
+
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eye">Informe · Período 2025 · Sistema de Bibliotecas</div>
+    <h1 class="hero-h1">Acceso por hora<br><em>2025</em></h1>
+    <p class="hero-desc">Análisis horario de ingresos a la biblioteca — vistas anual y mensual, mapas de calor interactivos, anomalías nocturnas y comparativos detallados para el período completo 2025.</p>
+    <div class="hero-kpis">
+      <div class="hkpi"><div class="hkpi-val red">448.982</div><div class="hkpi-label">Accesos totales 2025</div><div class="hkpi-sub">Personas detectadas · Ene–Dic</div></div>
+      <div class="hkpi"><div class="hkpi-val">12h</div><div class="hkpi-label">Hora punta acceso</div><div class="hkpi-sub">Mayor promedio global</div></div>
+      <div class="hkpi"><div class="hkpi-val blue">10 Mar</div><div class="hkpi-label">Día pico</div><div class="hkpi-sub">105.844 personas</div></div>
+      <div class="hkpi"><div class="hkpi-val purple">632</div><div class="hkpi-label">Anomalías nocturnas</div><div class="hkpi-sub">Accesos entre 22h – 05h</div></div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <section class="section" id="sec-resumen">
+    <div class="sec-eye">Factores clave</div>
+    <h2 class="sec-h2">Hallazgos <em>destacados</em></h2>
+    <p class="sec-sub">Principales patrones y anomalías detectadas en el análisis del período 2025.</p>
+    <div class="ins-row">
+      <div class="ins red"><div class="ins-t">📈 Pico masivo en Marzo</div><div class="ins-b">Marzo registró <strong>301.715 ingresos</strong>, el 67% del total anual. El 10 de marzo alcanzó el récord absoluto con <strong>105.844 personas</strong> en un solo día.</div></div>
+      <div class="ins purple"><div class="ins-t">🌙 632 accesos nocturnos</div><div class="ins-b">Se detectaron <strong>632 eventos</strong> de ingreso entre 22h–05h. Junio concentra la mayor cantidad. Caso extremo: <strong>4.837 personas</strong> a medianoche del 12 de junio.</div></div>
+      <div class="ins blue"><div class="ins-t">📅 Febrero sin actividad</div><div class="ins-b"><strong>Febrero 2025 registra cero ingresos</strong> en todo el mes. Posible cierre por mantenimiento, vacaciones institucionales o falla del sensor footfall.</div></div>
+      <div class="ins green"><div class="ins-t">⚖️ Desbalance In/Out</div><div class="ins-b">Las salidas superan las entradas en <strong>5.064 personas (+1,1%)</strong>. Puede indicar accesos por puertas no monitoreadas o desfases del sensor.</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-item"><div class="kpi-label">Total entradas</div><div class="kpi-val red">448.982</div><div class="kpi-sub">personas detectadas</div></div>
+      <div class="kpi-item"><div class="kpi-label">Total salidas</div><div class="kpi-val">454.046</div><div class="kpi-sub">personas detectadas</div></div>
+      <div class="kpi-item"><div class="kpi-label">Promedio diario</div><div class="kpi-val blue">1.230</div><div class="kpi-sub">personas/día con actividad</div></div>
+      <div class="kpi-item"><div class="kpi-label">Días activos</div><div class="kpi-val green">187</div><div class="kpi-sub">de 365 días del año</div></div>
+      <div class="kpi-item"><div class="kpi-label">Días sin actividad</div><div class="kpi-val">178</div><div class="kpi-sub">incluye fines de semana</div></div>
+    </div>
+  </section>
+
+  <!-- ACCESO ANUAL -->
+  <section class="section" id="sec-acceso">
+    <div class="sec-eye">ACC · Acceso por hora · Análisis 2025</div>
+    <h2 class="sec-h2">Vista <em>anual</em></h2>
+    <p class="sec-sub">Datos completos Ene–Dic 2025 · Distribución mensual, mapa de calor y curva horaria</p>
+    <div class="g31">
+      <div class="card">
+        <div class="card-h"><span class="card-t">Ingresos por mes — Entradas vs Salidas</span><span class="card-hint">personas/mes</span></div>
+        <div class="card-b ch260"><canvas id="monthlyChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">Ranking mensual</span></div>
+        <div class="card-b" style="padding:12px;"><div id="rankingMonthly"></div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-h"><span class="card-t">Mapa de calor anual — Promedio día de semana × hora</span><span class="card-hint">↗ Cursor sobre celda para valor exacto</span></div>
+      <div class="card-b">
+        <div class="hm-scroll" id="heatmapAnual"></div>
+        <div class="hm-leg"><span>Bajo</span><div class="hm-leg-bar" style="background:linear-gradient(to right,#f0ede8,#c8451e);"></div><span>Alto</span><span style="margin-left:16px;font-size:10px;">· Horas nocturnas (22h–05h) con borde púrpura</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-t">Curva horaria anual — Promedio de ingresos por hora del día</span><span class="card-hint">Horas nocturnas en púrpura</span></div>
+      <div class="card-b ch260"><canvas id="hourlyChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- MENSUAL -->
+  <section class="section" id="sec-mensual">
+    <div class="sec-eye">Vista mensual · Desglose por mes</div>
+    <h2 class="sec-h2">Análisis <em>mensual</em></h2>
+    <p class="sec-sub">Selecciona un mes para ver la curva horaria, ranking de días y serie diaria.</p>
+    <div class="month-sel" id="monthSel"></div>
+    <div class="msb">
+      <div class="msb-i"><div class="msb-v red" id="ms-total">—</div><div class="msb-l">Accesos del mes</div></div>
+      <div class="msb-i"><div class="msb-v" id="ms-hora">—</div><div class="msb-l">Hora punta</div></div>
+      <div class="msb-i"><div class="msb-v" id="ms-dia">—</div><div class="msb-l">Día más activo</div></div>
+      <div class="msb-i"><div class="msb-v" id="ms-vs">—</div><div class="msb-l">vs promedio mensual anual</div></div>
+    </div>
+    <div class="g31">
+      <div class="card">
+        <div class="card-h"><span class="card-t">Curva horaria del mes</span><span class="card-hint" id="ms-lbl">—</span></div>
+        <div class="card-b ch260"><canvas id="mHourlyChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">Top días del mes</span></div>
+        <div class="card-b" style="padding:12px;"><div id="rankingDays"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-t">Serie diaria del mes</span></div>
+      <div class="card-b ch200"><canvas id="mDailyChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ANOMALIAS -->
+  <section class="section" id="sec-anomalias">
+    <div class="sec-eye">Anomalías · Accesos fuera de horario</div>
+    <h2 class="sec-h2">Accesos <em>nocturnos</em></h2>
+    <p class="sec-sub">Registros de ingreso detectados entre las 22:00 y las 05:59 horas · 632 eventos en 2025</p>
+    <div class="g2">
+      <div class="card">
+        <div class="card-h"><span class="card-t">Ingresos nocturnos por mes</span></div>
+        <div class="card-b ch200"><canvas id="nightMChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">Distribución por hora nocturna</span><span class="card-hint">total acumulado</span></div>
+        <div class="card-b ch200"><canvas id="nightHChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-t">Registro detallado de anomalías nocturnas</span><span class="card-hint" id="aCount">—</span></div>
+      <div class="card-b" style="padding-bottom:0;">
+        <div class="af-row" id="afRow"></div>
+      </div>
+      <div class="a-scroll">
+        <table class="at">
+          <thead><tr><th>Fecha y hora</th><th>Hora</th><th>Entradas</th><th>Salidas</th><th>Δ In−Out</th><th>Nivel</th></tr></thead>
+          <tbody id="aBody"></tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;font-size:11px;color:var(--muted2);border-top:1px solid var(--border);">Anomalía = ingreso entre 22:00 y 05:59 · Máx. 200 registros mostrados</div>
+    </div>
+  </section>
+
+  <footer style="padding:28px 56px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--muted2);flex-wrap:wrap;gap:8px;background:var(--white);">
+    <span>Sistema de Bibliotecas · Informe Acceso por hora 2025</span>
+    <span>8.760 registros horarios · Footfall Detections · Ene–Dic 2025</span>
+  </footer>
+</main>
+
+<script>
+// ─── DATA ───────────────────────────────────────
+const MONTHLY=[{m:1,n:'Ene',i:3574,o:3691},{m:2,n:'Feb',i:0,o:0},{m:3,n:'Mar',i:301715,o:305322},{m:4,n:'Abr',i:24576,o:24799},{m:5,n:'May',i:18808,o:19002},{m:6,n:'Jun',i:25441,o:25493},{m:7,n:'Jul',i:9830,o:10035},{m:8,n:'Ago',i:10544,o:10674},{m:9,n:'Sep',i:16366,o:16518},{m:10,n:'Oct',i:16978,o:17111},{m:11,n:'Nov',i:15018,o:15203},{m:12,n:'Dic',i:6132,o:6198}];
+const HOURLY=[{h:0,v:23.6},{h:1,v:6.8},{h:2,v:1.8},{h:3,v:0.3},{h:4,v:4.0},{h:5,v:0.1},{h:6,v:0.0},{h:7,v:4.3},{h:8,v:19.6},{h:9,v:2.0},{h:10,v:6.6},{h:11,v:146.2},{h:12,v:302.6},{h:13,v:44.8},{h:14,v:49.1},{h:15,v:185.3},{h:16,v:63.2},{h:17,v:31.0},{h:18,v:78.0},{h:19,v:169.1},{h:20,v:24.0},{h:21,v:30.1},{h:22,v:20.5},{h:23,v:17.1}];
+const NIGHT_M=[{n:'Ene',t:277},{n:'Mar',t:1353},{n:'Abr',t:1323},{n:'May',t:2974},{n:'Jun',t:8827},{n:'Jul',t:1860},{n:'Ago',t:1624},{n:'Sep',t:2994},{n:'Oct',t:3272},{n:'Nov',t:1876},{n:'Dic',t:721}];
+const NA=[{"dt":"2025-01-02 03:00","in":7,"out":8,"hour":3},{"dt":"2025-01-02 22:00","in":1,"out":2,"hour":22},{"dt":"2025-01-02 23:00","in":2,"out":5,"hour":23},{"dt":"2025-01-03 02:00","in":3,"out":2,"hour":2},{"dt":"2025-01-03 03:00","in":4,"out":2,"hour":3},{"dt":"2025-01-03 22:00","in":11,"out":18,"hour":22},{"dt":"2025-01-03 23:00","in":4,"out":7,"hour":23},{"dt":"2025-01-06 22:00","in":6,"out":7,"hour":22},{"dt":"2025-01-06 23:00","in":2,"out":3,"hour":23},{"dt":"2025-01-07 00:00","in":1,"out":2,"hour":0},{"dt":"2025-01-07 03:00","in":2,"out":3,"hour":3},{"dt":"2025-01-07 22:00","in":42,"out":48,"hour":22},{"dt":"2025-01-07 23:00","in":3,"out":2,"hour":23},{"dt":"2025-01-08 00:00","in":3,"out":5,"hour":0},{"dt":"2025-01-08 03:00","in":8,"out":7,"hour":3},{"dt":"2025-01-08 22:00","in":35,"out":37,"hour":22},{"dt":"2025-01-08 23:00","in":4,"out":5,"hour":23},{"dt":"2025-01-09 00:00","in":5,"out":10,"hour":0},{"dt":"2025-01-09 01:00","in":1,"out":1,"hour":1},{"dt":"2025-01-09 03:00","in":5,"out":4,"hour":3},{"dt":"2025-01-09 22:00","in":32,"out":31,"hour":22},{"dt":"2025-01-09 23:00","in":4,"out":5,"hour":23},{"dt":"2025-01-10 00:00","in":2,"out":3,"hour":0},{"dt":"2025-01-10 04:00","in":2,"out":3,"hour":4},{"dt":"2025-01-21 22:00","in":7,"out":12,"hour":22},{"dt":"2025-01-21 23:00","in":7,"out":11,"hour":23},{"dt":"2025-01-22 00:00","in":4,"out":5,"hour":0},{"dt":"2025-01-22 01:00","in":2,"out":3,"hour":1},{"dt":"2025-01-22 03:00","in":2,"out":5,"hour":3},{"dt":"2025-01-22 22:00","in":11,"out":17,"hour":22},{"dt":"2025-01-22 23:00","in":4,"out":3,"hour":23},{"dt":"2025-01-23 00:00","in":2,"out":5,"hour":0},{"dt":"2025-01-23 01:00","in":1,"out":2,"hour":1},{"dt":"2025-01-23 02:00","in":4,"out":7,"hour":2},{"dt":"2025-01-23 03:00","in":2,"out":0,"hour":3},{"dt":"2025-01-23 22:00","in":10,"out":15,"hour":22},{"dt":"2025-01-23 23:00","in":9,"out":14,"hour":23},{"dt":"2025-01-24 00:00","in":2,"out":4,"hour":0},{"dt":"2025-01-24 03:00","in":6,"out":5,"hour":3},{"dt":"2025-01-24 22:00","in":9,"out":10,"hour":22},{"dt":"2025-01-24 23:00","in":5,"out":3,"hour":23},{"dt":"2025-01-25 00:00","in":1,"out":5,"hour":0},{"dt":"2025-03-06 22:00","in":6,"out":18,"hour":22},{"dt":"2025-03-06 23:00","in":3,"out":4,"hour":23},{"dt":"2025-03-07 03:00","in":10,"out":7,"hour":3},{"dt":"2025-03-10 22:00","in":37,"out":27,"hour":22},{"dt":"2025-03-10 23:00","in":43,"out":54,"hour":23},{"dt":"2025-03-11 00:00","in":11,"out":16,"hour":0},{"dt":"2025-03-11 01:00","in":4,"out":7,"hour":1},{"dt":"2025-03-11 22:00","in":17,"out":36,"hour":22},{"dt":"2025-03-11 23:00","in":27,"out":29,"hour":23},{"dt":"2025-03-12 00:00","in":14,"out":18,"hour":0},{"dt":"2025-03-12 01:00","in":1,"out":2,"hour":1},{"dt":"2025-03-12 22:00","in":19,"out":37,"hour":22},{"dt":"2025-03-12 23:00","in":45,"out":47,"hour":23},{"dt":"2025-03-13 00:00","in":10,"out":16,"hour":0},{"dt":"2025-03-13 22:00","in":45,"out":67,"hour":22},{"dt":"2025-03-13 23:00","in":56,"out":58,"hour":23},{"dt":"2025-03-14 00:00","in":2,"out":13,"hour":0},{"dt":"2025-03-14 04:00","in":2,"out":3,"hour":4},{"dt":"2025-03-14 05:00","in":2,"out":8,"hour":5},{"dt":"2025-03-14 22:00","in":46,"out":59,"hour":22},{"dt":"2025-03-14 23:00","in":31,"out":38,"hour":23},{"dt":"2025-03-15 00:00","in":5,"out":24,"hour":0},{"dt":"2025-03-17 22:00","in":75,"out":69,"hour":22},{"dt":"2025-03-17 23:00","in":50,"out":80,"hour":23},{"dt":"2025-03-18 00:00","in":11,"out":20,"hour":0},{"dt":"2025-03-18 02:00","in":1,"out":1,"hour":2},{"dt":"2025-03-18 05:00","in":3,"out":4,"hour":5},{"dt":"2025-03-18 22:00","in":70,"out":85,"hour":22},{"dt":"2025-03-18 23:00","in":37,"out":40,"hour":23},{"dt":"2025-03-19 00:00","in":9,"out":25,"hour":0},{"dt":"2025-03-19 01:00","in":1,"out":1,"hour":1},{"dt":"2025-03-19 03:00","in":1,"out":1,"hour":3},{"dt":"2025-03-19 22:00","in":38,"out":33,"hour":22},{"dt":"2025-03-19 23:00","in":37,"out":49,"hour":23},{"dt":"2025-03-20 00:00","in":8,"out":28,"hour":0},{"dt":"2025-03-20 22:00","in":31,"out":43,"hour":22},{"dt":"2025-03-20 23:00","in":22,"out":40,"hour":23},{"dt":"2025-03-21 00:00","in":7,"out":12,"hour":0},{"dt":"2025-03-21 22:00","in":19,"out":25,"hour":22},{"dt":"2025-03-21 23:00","in":16,"out":24,"hour":23},{"dt":"2025-03-22 00:00","in":2,"out":8,"hour":0},{"dt":"2025-03-24 22:00","in":44,"out":53,"hour":22},{"dt":"2025-03-24 23:00","in":38,"out":55,"hour":23},{"dt":"2025-03-25 00:00","in":5,"out":18,"hour":0},{"dt":"2025-03-25 01:00","in":3,"out":4,"hour":1},{"dt":"2025-03-25 05:00","in":7,"out":10,"hour":5},{"dt":"2025-03-25 22:00","in":18,"out":31,"hour":22},{"dt":"2025-03-25 23:00","in":47,"out":42,"hour":23},{"dt":"2025-03-26 00:00","in":7,"out":20,"hour":0},{"dt":"2025-03-26 01:00","in":1,"out":8,"hour":1},{"dt":"2025-03-26 02:00","in":11,"out":22,"hour":2},{"dt":"2025-03-26 22:00","in":38,"out":47,"hour":22},{"dt":"2025-03-26 23:00","in":32,"out":54,"hour":23},{"dt":"2025-03-27 00:00","in":18,"out":30,"hour":0},{"dt":"2025-03-27 01:00","in":8,"out":17,"hour":1},{"dt":"2025-03-27 02:00","in":6,"out":5,"hour":2},{"dt":"2025-03-27 22:00","in":51,"out":56,"hour":22},{"dt":"2025-03-27 23:00","in":46,"out":65,"hour":23},{"dt":"2025-03-28 00:00","in":9,"out":18,"hour":0},{"dt":"2025-03-31 22:00","in":56,"out":56,"hour":22},{"dt":"2025-03-31 23:00","in":34,"out":61,"hour":23},{"dt":"2025-04-01 00:00","in":34,"out":61,"hour":0},{"dt":"2025-04-01 01:00","in":7,"out":19,"hour":1},{"dt":"2025-04-01 02:00","in":2,"out":4,"hour":2},{"dt":"2025-04-01 22:00","in":115,"out":111,"hour":22},{"dt":"2025-04-01 23:00","in":56,"out":60,"hour":23},{"dt":"2025-04-02 00:00","in":57,"out":73,"hour":0},{"dt":"2025-04-02 01:00","in":5,"out":27,"hour":1},{"dt":"2025-04-02 02:00","in":8,"out":10,"hour":2},{"dt":"2025-04-02 03:00","in":1,"out":4,"hour":3},{"dt":"2025-04-02 22:00","in":81,"out":76,"hour":22},{"dt":"2025-04-02 23:00","in":66,"out":86,"hour":23},{"dt":"2025-04-03 00:00","in":58,"out":67,"hour":0},{"dt":"2025-04-03 01:00","in":17,"out":29,"hour":1},{"dt":"2025-04-03 02:00","in":2,"out":4,"hour":2},{"dt":"2025-04-03 03:00","in":4,"out":13,"hour":3},{"dt":"2025-04-03 22:00","in":42,"out":40,"hour":22},{"dt":"2025-04-25 22:00","in":54,"out":40,"hour":22},{"dt":"2025-04-25 23:00","in":74,"out":73,"hour":23},{"dt":"2025-04-26 00:00","in":40,"out":72,"hour":0},{"dt":"2025-04-26 01:00","in":26,"out":33,"hour":1},{"dt":"2025-04-28 22:00","in":83,"out":81,"hour":22},{"dt":"2025-04-28 23:00","in":84,"out":69,"hour":23},{"dt":"2025-04-29 02:00","in":126,"out":175,"hour":2},{"dt":"2025-04-29 03:00","in":1,"out":6,"hour":3},{"dt":"2025-04-29 05:00","in":4,"out":10,"hour":5},{"dt":"2025-04-29 22:00","in":71,"out":91,"hour":22},{"dt":"2025-04-29 23:00","in":64,"out":59,"hour":23},{"dt":"2025-04-30 00:00","in":56,"out":63,"hour":0},{"dt":"2025-04-30 01:00","in":68,"out":71,"hour":1},{"dt":"2025-04-30 02:00","in":15,"out":40,"hour":2},{"dt":"2025-04-30 03:00","in":2,"out":9,"hour":3},{"dt":"2025-05-02 22:00","in":34,"out":25,"hour":22},{"dt":"2025-05-02 23:00","in":42,"out":45,"hour":23},{"dt":"2025-05-03 00:00","in":33,"out":54,"hour":0},{"dt":"2025-05-03 01:00","in":24,"out":29,"hour":1},{"dt":"2025-05-03 02:00","in":3,"out":11,"hour":2},{"dt":"2025-05-05 22:00","in":57,"out":74,"hour":22},{"dt":"2025-05-05 23:00","in":80,"out":72,"hour":23},{"dt":"2025-05-06 00:00","in":34,"out":43,"hour":0},{"dt":"2025-05-06 01:00","in":66,"out":69,"hour":1},{"dt":"2025-05-06 02:00","in":17,"out":33,"hour":2},{"dt":"2025-05-06 03:00","in":1,"out":5,"hour":3},{"dt":"2025-05-09 22:00","in":40,"out":31,"hour":22},{"dt":"2025-05-09 23:00","in":62,"out":50,"hour":23},{"dt":"2025-05-10 00:00","in":22,"out":59,"hour":0},{"dt":"2025-05-10 01:00","in":50,"out":51,"hour":1},{"dt":"2025-05-10 02:00","in":6,"out":14,"hour":2},{"dt":"2025-05-12 22:00","in":97,"out":98,"hour":22},{"dt":"2025-05-12 23:00","in":82,"out":78,"hour":23},{"dt":"2025-05-13 00:00","in":85,"out":78,"hour":0},{"dt":"2025-05-13 01:00","in":52,"out":71,"hour":1},{"dt":"2025-05-13 02:00","in":22,"out":51,"hour":2},{"dt":"2025-05-13 03:00","in":4,"out":10,"hour":3},{"dt":"2025-05-13 22:00","in":94,"out":117,"hour":22},{"dt":"2025-05-13 23:00","in":77,"out":81,"hour":23},{"dt":"2025-05-14 00:00","in":63,"out":72,"hour":0},{"dt":"2025-05-14 01:00","in":64,"out":66,"hour":1},{"dt":"2025-05-14 02:00","in":32,"out":73,"hour":2},{"dt":"2025-05-14 03:00","in":1,"out":5,"hour":3},{"dt":"2025-05-14 22:00","in":88,"out":107,"hour":22},{"dt":"2025-05-14 23:00","in":66,"out":59,"hour":23},{"dt":"2025-05-15 00:00","in":61,"out":61,"hour":0},{"dt":"2025-05-15 01:00","in":31,"out":51,"hour":1},{"dt":"2025-05-15 02:00","in":17,"out":22,"hour":2},{"dt":"2025-05-15 03:00","in":2,"out":7,"hour":3},{"dt":"2025-05-19 22:00","in":83,"out":101,"hour":22},{"dt":"2025-05-19 23:00","in":85,"out":80,"hour":23},{"dt":"2025-05-20 00:00","in":53,"out":65,"hour":0},{"dt":"2025-05-20 01:00","in":60,"out":73,"hour":1},{"dt":"2025-05-20 02:00","in":16,"out":42,"hour":2},{"dt":"2025-05-20 03:00","in":1,"out":3,"hour":3},{"dt":"2025-05-20 22:00","in":96,"out":89,"hour":22},{"dt":"2025-05-20 23:00","in":108,"out":102,"hour":23},{"dt":"2025-05-21 00:00","in":79,"out":87,"hour":0},{"dt":"2025-05-21 01:00","in":50,"out":71,"hour":1},{"dt":"2025-05-21 02:00","in":16,"out":29,"hour":2},{"dt":"2025-05-21 03:00","in":2,"out":8,"hour":3},{"dt":"2025-05-22 22:00","in":94,"out":93,"hour":22},{"dt":"2025-05-22 23:00","in":94,"out":78,"hour":23},{"dt":"2025-05-23 00:00","in":65,"out":83,"hour":0},{"dt":"2025-05-23 01:00","in":33,"out":62,"hour":1},{"dt":"2025-05-23 22:00","in":58,"out":54,"hour":22},{"dt":"2025-05-23 23:00","in":68,"out":56,"hour":23},{"dt":"2025-05-24 00:00","in":49,"out":83,"hour":0},{"dt":"2025-05-24 01:00","in":43,"out":59,"hour":1},{"dt":"2025-05-24 02:00","in":2,"out":14,"hour":2},{"dt":"2025-05-26 22:00","in":75,"out":69,"hour":22},{"dt":"2025-05-26 23:00","in":86,"out":63,"hour":23},{"dt":"2025-05-27 00:00","in":54,"out":83,"hour":0},{"dt":"2025-05-27 01:00","in":82,"out":73,"hour":1},{"dt":"2025-05-27 02:00","in":12,"out":45,"hour":2},{"dt":"2025-05-27 03:00","in":1,"out":4,"hour":3},{"dt":"2025-06-09 04:00","in":1245,"out":963,"hour":4},{"dt":"2025-06-12 00:00","in":4837,"out":5144,"hour":0},{"dt":"2025-06-12 01:00","in":45,"out":51,"hour":1},{"dt":"2025-06-12 02:00","in":14,"out":34,"hour":2},{"dt":"2025-06-12 22:00","in":45,"out":48,"hour":22}];
+
+const DBM={1:[{d:2,v:94},{d:3,v:98},{d:6,v:188},{d:7,v:239},{d:8,v:226},{d:9,v:258},{d:21,v:1842},{d:22,v:232},{d:23,v:175},{d:24,v:145}],3:[{d:5,v:13352},{d:6,v:52396},{d:7,v:73284},{d:9,v:42137},{d:10,v:105844},{d:11,v:771},{d:12,v:1033},{d:13,v:1065},{d:14,v:867},{d:17,v:1005},{d:18,v:1164},{d:19,v:994},{d:20,v:785},{d:21,v:624},{d:24,v:936},{d:25,v:1057},{d:26,v:1093},{d:27,v:1084},{d:31,v:1178}],4:[{d:1,v:1349},{d:2,v:1257},{d:3,v:967},{d:25,v:18628},{d:26,v:275},{d:28,v:850},{d:29,v:1109},{d:30,v:141}],5:[{d:2,v:1958},{d:3,v:156},{d:5,v:766},{d:6,v:603},{d:9,v:3401},{d:10,v:196},{d:12,v:967},{d:13,v:1285},{d:14,v:1406},{d:19,v:3068},{d:20,v:1175},{d:22,v:1031},{d:23,v:843},{d:26,v:1077}],6:[{d:4,v:6174},{d:9,v:1245},{d:12,v:5733},{d:13,v:711},{d:17,v:2568},{d:18,v:1576},{d:19,v:1238},{d:23,v:1050},{d:24,v:1195},{d:25,v:1318},{d:26,v:782},{d:27,v:795}],7:[{d:1,v:1764},{d:3,v:1516},{d:8,v:619},{d:9,v:714},{d:14,v:1201},{d:24,v:1285},{d:29,v:340}],8:[{d:14,v:3071},{d:18,v:602},{d:19,v:629},{d:20,v:907},{d:21,v:744},{d:22,v:651},{d:25,v:653},{d:26,v:713},{d:27,v:687},{d:28,v:746},{d:29,v:728}],9:[{d:1,v:671},{d:2,v:1056},{d:3,v:935},{d:4,v:881},{d:8,v:1166},{d:9,v:1203},{d:10,v:1148},{d:22,v:717},{d:23,v:843},{d:24,v:944},{d:29,v:842},{d:30,v:886}],10:[{d:1,v:736},{d:2,v:603},{d:3,v:585},{d:6,v:735},{d:7,v:822},{d:8,v:837},{d:13,v:689},{d:14,v:802},{d:15,v:996},{d:20,v:731},{d:21,v:930},{d:22,v:898},{d:23,v:915},{d:27,v:783},{d:28,v:743},{d:29,v:806}],11:[{d:3,v:621},{d:4,v:790},{d:5,v:710},{d:6,v:770},{d:10,v:667},{d:12,v:759},{d:18,v:1050},{d:19,v:914},{d:20,v:916},{d:24,v:1076},{d:25,v:1209},{d:26,v:1014},{d:27,v:1022}],12:[{d:1,v:820},{d:2,v:932},{d:3,v:677},{d:4,v:640},{d:5,v:557},{d:15,v:363},{d:16,v:308},{d:17,v:327},{d:18,v:297}]};
+
+const HMR=[{"weekday":0,"hour":0,"v":0},{"weekday":0,"hour":4,"v":23.9},{"weekday":0,"hour":8,"v":0.2},{"weekday":0,"hour":9,"v":0.6},{"weekday":0,"hour":10,"v":1.5},{"weekday":0,"hour":11,"v":1014.4},{"weekday":0,"hour":12,"v":1020.5},{"weekday":0,"hour":13,"v":20.2},{"weekday":0,"hour":14,"v":56.2},{"weekday":0,"hour":15,"v":52.9},{"weekday":0,"hour":16,"v":48.5},{"weekday":0,"hour":17,"v":40.1},{"weekday":0,"hour":18,"v":41.7},{"weekday":0,"hour":19,"v":39.0},{"weekday":0,"hour":20,"v":33.9},{"weekday":0,"hour":21,"v":90.3},{"weekday":0,"hour":22,"v":31.1},{"weekday":0,"hour":23,"v":27.1},{"weekday":1,"hour":0,"v":16.4},{"weekday":1,"hour":1,"v":10.8},{"weekday":1,"hour":2,"v":5.4},{"weekday":1,"hour":7,"v":5.5},{"weekday":1,"hour":8,"v":20.3},{"weekday":1,"hour":10,"v":19.7},{"weekday":1,"hour":13,"v":23.8},{"weekday":1,"hour":14,"v":42.7},{"weekday":1,"hour":15,"v":88.1},{"weekday":1,"hour":16,"v":60.1},{"weekday":1,"hour":17,"v":57.0},{"weekday":1,"hour":18,"v":52.3},{"weekday":1,"hour":19,"v":46.4},{"weekday":1,"hour":20,"v":37.9},{"weekday":1,"hour":21,"v":41.1},{"weekday":1,"hour":22,"v":41.1},{"weekday":1,"hour":23,"v":28.8},{"weekday":2,"hour":0,"v":20.6},{"weekday":2,"hour":1,"v":12.6},{"weekday":2,"hour":2,"v":3.6},{"weekday":2,"hour":7,"v":23.2},{"weekday":2,"hour":8,"v":95.0},{"weekday":2,"hour":12,"v":65.3},{"weekday":2,"hour":13,"v":216.4},{"weekday":2,"hour":14,"v":41.5},{"weekday":2,"hour":15,"v":48.9},{"weekday":2,"hour":16,"v":43.2},{"weekday":2,"hour":17,"v":40.6},{"weekday":2,"hour":18,"v":38.9},{"weekday":2,"hour":19,"v":34.0},{"weekday":2,"hour":20,"v":47.7},{"weekday":2,"hour":22,"v":27.0},{"weekday":2,"hour":23,"v":22.5},{"weekday":3,"hour":0,"v":107.2},{"weekday":3,"hour":1,"v":9.0},{"weekday":3,"hour":8,"v":19.3},{"weekday":3,"hour":10,"v":22.2},{"weekday":3,"hour":12,"v":1013.2},{"weekday":3,"hour":13,"v":31.0},{"weekday":3,"hour":14,"v":87.8},{"weekday":3,"hour":15,"v":50.2},{"weekday":3,"hour":16,"v":47.0},{"weekday":3,"hour":17,"v":40.5},{"weekday":3,"hour":18,"v":33.6},{"weekday":3,"hour":19,"v":32.2},{"weekday":3,"hour":22,"v":26.1},{"weekday":3,"hour":23,"v":23.2},{"weekday":4,"hour":0,"v":11.8},{"weekday":4,"hour":1,"v":6.2},{"weekday":4,"hour":14,"v":103.5},{"weekday":4,"hour":15,"v":1043.4},{"weekday":4,"hour":16,"v":230.8},{"weekday":4,"hour":17,"v":29.1},{"weekday":4,"hour":18,"v":376.5},{"weekday":4,"hour":19,"v":223.9},{"weekday":4,"hour":22,"v":18.3},{"weekday":4,"hour":23,"v":18.1},{"weekday":5,"hour":0,"v":9.5},{"weekday":5,"hour":1,"v":9.0},{"weekday":5,"hour":12,"v":6.2},{"weekday":5,"hour":13,"v":6.2},{"weekday":5,"hour":14,"v":11.9},{"weekday":5,"hour":15,"v":16.2},{"weekday":5,"hour":16,"v":13.3},{"weekday":6,"hour":19,"v":810.3}];
+
+// ─── UTILS ───────────────────────────────────────
+const fmt=n=>n.toLocaleString('es-CL');
+const NH=new Set([22,23,0,1,2,3,4,5]);
+const DS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MS=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MSH=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function navTo(id,btn){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+// ─── CHART DEFAULTS ───────────────────────────────
+Chart.defaults.font.family="'Inter',sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.color='#7a7670';
+Chart.defaults.plugins.legend.labels.boxWidth=12;
+Chart.defaults.plugins.legend.labels.padding=14;
+
+// ─── MONTHLY CHART ────────────────────────────────
+new Chart(document.getElementById('monthlyChart'),{type:'bar',data:{labels:MONTHLY.map(m=>m.n),datasets:[{label:'Entradas',data:MONTHLY.map(m=>m.i),backgroundColor:'rgba(200,69,30,0.75)',borderRadius:3,borderSkipped:false},{label:'Salidas',data:MONTHLY.map(m=>m.o),backgroundColor:'rgba(26,95,174,0.4)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0ede8'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}}});
+
+// ─── HOURLY CHART ─────────────────────────────────
+new Chart(document.getElementById('hourlyChart'),{type:'bar',data:{labels:HOURLY.map(h=>`${h.h}h`),datasets:[{label:'Prom. personas/hora',data:HOURLY.map(h=>h.v),backgroundColor:HOURLY.map(h=>NH.has(h.h)?'rgba(107,63,160,0.65)':'rgba(200,69,30,0.7)'),borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toFixed(1)} personas/h`}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0ede8'}}}}});
+
+// ─── MONTHLY RANKING ──────────────────────────────
+const maxM=Math.max(...MONTHLY.map(m=>m.i));
+document.getElementById('rankingMonthly').innerHTML=MONTHLY.filter(m=>m.i>0).sort((a,b)=>b.i-a.i).map((m,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);"><span style="font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace;width:16px">${i+1}</span><span style="font-size:13px;font-weight:500;width:32px">${m.n}</span><div style="flex:1;background:var(--bg);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:var(--accent);width:${(m.i/maxM*100).toFixed(1)}%;transition:width 0.5s"></div></div><span style="font-size:11px;font-family:'JetBrains Mono',monospace;min-width:72px;text-align:right">${fmt(m.i)}</span></div>`).join('');
+
+// ─── HEATMAP ──────────────────────────────────────
+(function(){
+  const mat={};
+  HMR.forEach(d=>{mat[`${d.weekday}_${d.hour}`]=d.v;});
+  const maxV=Math.max(...HMR.map(d=>d.v));
+  function cellClr(v){
+    if(v<0.5)return{bg:'#f7f6f3',tx:'#d1cdc8'};
+    const n=Math.pow(v/maxV,0.35);
+    const r=Math.round(247-n*(247-200)),g=Math.round(246-n*(246-69)),b=Math.round(243-n*(243-30));
+    return{bg:`rgb(${r},${g},${b})`,tx:(0.299*r+0.587*g+0.114*b)>140?'#1a1915':'#ffffff'};
+  }
+  let html=`<div class="hm-hours"><div></div>`;
+  for(let h=0;h<24;h++)html+=`<div class="hm-hl">${h}</div>`;
+  html+='</div>';
+  for(let d=0;d<7;d++){
+    html+=`<div class="hm-row"><div class="hm-dl">${DS[d]}</div>`;
+    for(let h=0;h<24;h++){
+      const v=mat[`${d}_${h}`]||0;
+      const{bg,tx}=cellClr(v);
+      const nb=NH.has(h)?'outline:1px solid rgba(107,63,160,.35);':'';
+      html+=`<div class="hm-cell" style="background:${bg};color:${tx};${nb}" title="${DS[d]} ${h}h · ${v.toFixed(1)} personas">${v>=1?Math.round(v):''}</div>`;
+    }
+    html+='</div>';
+  }
+  document.getElementById('heatmapAnual').innerHTML=html;
+})();
+
+// ─── MONTHLY VIEW ─────────────────────────────────
+let AM=3, mHC=null, mDC=null;
+const mSel=document.getElementById('monthSel');
+MONTHLY.filter(m=>m.i>0).forEach(m=>{
+  const b=document.createElement('button');
+  b.className='mb'+(m.m===AM?' active':'');
+  b.textContent=m.n;
+  b.onclick=()=>{AM=m.m;updateM();mSel.querySelectorAll('.mb').forEach(x=>x.classList.remove('active'));b.classList.add('active');};
+  mSel.appendChild(b);
+});
+
+function updateM(){
+  const m=MONTHLY.find(x=>x.m===AM);
+  const days=DBM[AM]||[];
+  const avgAnual=448982/11;
+  document.getElementById('ms-total').textContent=fmt(m.i);
+  const peakDay=days.length?days.reduce((a,b)=>a.v>b.v?a:b):{d:'—'};
+  document.getElementById('ms-dia').textContent=peakDay.d!=='—'?`${peakDay.d} ${MSH[AM]}`:'—';
+  document.getElementById('ms-hora').textContent=m.i>100?'12h':'—';
+  document.getElementById('ms-lbl').textContent=MS[AM]+' 2025';
+  const diff=((m.i-avgAnual)/avgAnual*100).toFixed(1);
+  const el=document.getElementById('ms-vs');
+  el.textContent=(diff>0?'+':'')+diff+'%';
+  el.style.color=diff>0?'var(--accent)':'var(--green)';
+
+  const scale=m.i/HOURLY.reduce((s,h)=>s+h.v,0);
+  const hd=HOURLY.map(h=>+(h.v*scale).toFixed(0));
+  if(mHC)mHC.destroy();
+  mHC=new Chart(document.getElementById('mHourlyChart'),{type:'line',data:{labels:HOURLY.map(h=>`${h.h}h`),datasets:[{label:'Ingresos/hora',data:hd,borderColor:'#c8451e',backgroundColor:'rgba(200,69,30,0.06)',borderWidth:2,fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#c8451e'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} personas`}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0ede8'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}}});
+
+  const daysN=new Date(2025,AM,0).getDate();
+  const dm={};days.forEach(d=>{dm[d.d]=d.v;});
+  const dl=Array.from({length:daysN},(_,i)=>i+1);
+  const dv=dl.map(d=>dm[d]||0);
+  if(mDC)mDC.destroy();
+  mDC=new Chart(document.getElementById('mDailyChart'),{type:'bar',data:{labels:dl,datasets:[{label:'Personas/día',data:dv,backgroundColor:dv.map(v=>v>5000?'#c8451e':'rgba(200,69,30,0.55)'),borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} personas`,title:t=>`Día ${t[0].label} de ${MS[AM]}`}}},scales:{x:{grid:{display:false},ticks:{maxRotation:0}},y:{grid:{color:'#f0ede8'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}}});
+
+  const top=[...days].sort((a,b)=>b.v-a.v).slice(0,8);
+  const mx=top[0]?.v||1;
+  document.getElementById('rankingDays').innerHTML=top.map((d,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);"><span style="font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace;width:16px">${i+1}</span><span style="font-size:13px;font-weight:500;width:42px">${d.d} ${MSH[AM]}</span><div style="flex:1;background:var(--bg);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:var(--accent);width:${(d.v/mx*100).toFixed(1)}%;transition:width 0.5s"></div></div><span style="font-size:11px;font-family:'JetBrains Mono',monospace;min-width:72px;text-align:right">${fmt(d.v)}</span></div>`).join('')||'<p style="color:var(--muted2);font-size:12px;padding:12px 0">Sin datos</p>';
+}
+updateM();
+
+// ─── NIGHT CHARTS ─────────────────────────────────
+new Chart(document.getElementById('nightMChart'),{type:'bar',data:{labels:NIGHT_M.map(m=>m.n),datasets:[{label:'Ingresos nocturnos',data:NIGHT_M.map(m=>m.t),backgroundColor:'rgba(107,63,160,0.7)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} personas`}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0ede8'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}}}}});
+
+const nhc={};NA.forEach(a=>{nhc[a.hour]=(nhc[a.hour]||0)+a.in;});
+const nhl=[22,23,0,1,2,3,4,5];
+new Chart(document.getElementById('nightHChart'),{type:'bar',data:{labels:nhl.map(h=>`${h}h`),datasets:[{label:'Total',data:nhl.map(h=>nhc[h]||0),backgroundColor:'rgba(107,63,160,0.65)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} personas`}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0ede8'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}}});
+
+// ─── ANOMALY TABLE ────────────────────────────────
+let af='all';
+const mia=[...new Set(NA.map(a=>a.dt.slice(0,7)))];
+const afRow=document.getElementById('afRow');
+const ab=document.createElement('button');ab.className='af active';ab.textContent='Todos';ab.onclick=()=>{af='all';setAf(ab);};afRow.appendChild(ab);
+mia.forEach(ym=>{const mn=parseInt(ym.slice(5));const b=document.createElement('button');b.className='af';b.textContent=MSH[mn];b.onclick=()=>{af=ym;setAf(b);};afRow.appendChild(b);});
+function setAf(btn){document.querySelectorAll('.af').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderA();}
+function renderA(){
+  const f=af==='all'?NA:NA.filter(a=>a.dt.startsWith(af));
+  document.getElementById('aCount').textContent=`${f.length} registros`;
+  const id=h=>[0,1,2,3,4,5].includes(h);
+  document.getElementById('aBody').innerHTML=f.map(a=>{
+    const d=a.in-a.out,dc=d<-5?'dneg':d>5?'dpos':'';
+    const cc=id(a.hour)?'chip-d':'chip-l';
+    let bt,bc;if(a.in>=200){bt='Crítico';bc='bc';}else if(a.in>=50){bt='Alto';bc='bh';}else if(a.in>=15){bt='Medio';bc='bm';}else{bt='Bajo';bc='bl';}
+    return`<tr><td class="mono">${a.dt}</td><td><span class="hchip ${cc}">${a.hour}:00h</span></td><td class="mono" style="color:var(--accent);font-weight:500">${a.in}</td><td class="mono">${a.out}</td><td class="mono ${dc}">${d>0?'+'+d:d}</td><td><span class="badge ${bc}">${bt}</span></td></tr>`;
+  }).join('');
+}
+renderA();
+</script>
+</body>
+</html>
